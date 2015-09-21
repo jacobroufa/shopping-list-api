@@ -26,8 +26,12 @@ Storage.prototype.add = function add( name ) {
 };
 
 Storage.prototype.update = function update( id, item ) {
+  var newItem; // may or may not be used
   if ( !this.items[id] ) {
-    return this.add( item.name );
+    newItem = this.add( item.name );
+    newItem.status = 'new';
+
+    return newItem;
   }
 
   this.items[id].name = item.name;
@@ -88,7 +92,10 @@ app.put( '/items/:id', jsonBody, function( req, res ) {
 
   var item = storage.update( req.params.id, req.body );
 
-  return res.json( item );
+  return res.status( item.status && item.status === 'new' ? 201 : 200 ).json( item );
 });
 
 app.listen( process.env.PORT || 8080 );
+
+exports.app = app;
+exports.storage = storage;
